@@ -186,7 +186,9 @@ void update() {
     }
     
     // Colisão da bola com as raquetes
-    if ((ballX <= LEFT_PADDLE_X + PADDLE_WIDTH) && (ballY + BALL_SIZE >= leftPaddleY && ballY <= leftPaddleY + PADDLE_HEIGHT)) {
+    if ((ballX <= LEFT_PADDLE_X + PADDLE_WIDTH) && 
+    (ballX + BALL_SIZE >= LEFT_PADDLE_X) &&
+    (ballY + BALL_SIZE >= leftPaddleY && ballY <= leftPaddleY + PADDLE_HEIGHT)){
         if(ballVelocityX < 0){
           isPlayingSound = true;
           const char* soundFile = "/home/lucas/Documentos/homework/sounds/paddle2.wav";
@@ -207,7 +209,9 @@ void update() {
             ballVelocityY --;
           }
         }
-    } else if ((ballX >= RIGHT_PADDLE_X - BALL_SIZE) && (ballY + BALL_SIZE >= rightPaddleY && ballY <= rightPaddleY + PADDLE_HEIGHT)) {
+    } else if ((ballX + BALL_SIZE >= RIGHT_PADDLE_X) && 
+           (ballX <= RIGHT_PADDLE_X + PADDLE_WIDTH) &&
+           (ballY + BALL_SIZE >= rightPaddleY && ballY <= rightPaddleY + PADDLE_HEIGHT)) {
         if(ballVelocityX > 0){
           isPlayingSound = true;
           const char* soundFile = "/home/lucas/Documentos/homework/sounds/paddle2.wav";
