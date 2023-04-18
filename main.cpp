@@ -4,6 +4,74 @@
 #include <math.h>
 #include <GL/glut.h>
 #include <string>
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alut.h>
+#include <thread>
+
+bool isPlayingSound = false; // indica que o som está tocando
+
+void play_sound(const char* file_path) {
+
+    alutInit(NULL,NULL);
+    // Abrir o arquivo de som
+    ALuint buffer = alutCreateBufferFromFile(file_path);
+    if (!buffer) {
+        printf("Erro ao abrir o arquivo de som!\n");
+        return;
+    }
+
+    // Criar uma nova fonte de som
+    ALuint source;
+    alGenSources(1, &source);
+    if (alGetError() != AL_NO_ERROR) {
+        printf("Erro ao criar a fonte de som!\n");
+        alutExit();
+        return;
+    }
+
+    // Conectar a fonte de som com o buffer de som
+    alSourcei(source, AL_BUFFER, buffer);
+    if (alGetError() != AL_NO_ERROR) {
+        printf("Erro ao conectar a fonte de som com o buffer de som!\n");
+        alDeleteSources(1, &source);
+        alDeleteBuffers(1, &buffer);
+        alutExit();
+        return;
+    }
+
+    // Tocar o som
+    alSourcePlay(source);
+    if (alGetError() != AL_NO_ERROR) {
+        printf("Erro ao tocar o som!\n");
+        alDeleteSources(1, &source);
+        alDeleteBuffers(1, &buffer);
+        alutExit();
+        return;
+    }
+
+    // Aguardar o som terminar de tocar
+    ALint status;
+    do {
+        alGetSourcei(source, AL_SOURCE_STATE, &status);
+    } while (status == AL_PLAYING);
+
+    // Limpar os recursos
+    alDeleteSources(1, &source);
+    alDeleteBuffers(1, &buffer);
+    alutExit();
+
+    isPlayingSound = false;
+}
+
+void playSoundThread(const char* file_path) {
+    if (isPlayingSound) {
+        play_sound(file_path);
+    }
+}
+
+
+
 
 // Constantes do jogo
 const int WINDOW_WIDTH = 640; // largura da janela
@@ -31,6 +99,12 @@ int leftScore = 0; // pontuação do jogador da esquerda
 int rightScore = 0; // pontuação do jogador da direita
 
 bool isPaused = false;
+
+// Variáveis para os sons
+ALCdevice *dev = NULL;
+ALCcontext *ctx = NULL;
+ALuint source;
+ALuint buffer1, buffer2;
 
 
 void drawBall() {
@@ -116,6 +190,12 @@ void update() {
     // Colisão da bola com as raquetes
     if ((ballX <= LEFT_PADDLE_X + PADDLE_WIDTH) && (ballY + BALL_SIZE >= leftPaddleY && ballY <= leftPaddleY + PADDLE_HEIGHT)) {
         if(ballVelocityX < 0){
+          isPlayingSound = true;
+          const char* soundFile = "/home/lucas/Documentos/homework/sounds/paddle2.wav";
+          std::thread soundThread([soundFile]() {
+              playSoundThread(soundFile);
+          });
+          soundThread.detach();
           ballVelocityX *= -1;
           if(ballVelocityX > 0){
             ballVelocityX ++;
@@ -131,6 +211,12 @@ void update() {
         }
     } else if ((ballX >= RIGHT_PADDLE_X - BALL_SIZE) && (ballY + BALL_SIZE >= rightPaddleY && ballY <= rightPaddleY + PADDLE_HEIGHT)) {
         if(ballVelocityX > 0){
+          isPlayingSound = true;
+          const char* soundFile = "/home/lucas/Documentos/homework/sounds/paddle2.wav";
+          std::thread soundThread([soundFile]() {
+              playSoundThread(soundFile);
+          });
+          soundThread.detach();
           ballVelocityX *= -1;
           if(ballVelocityX > 0){
             ballVelocityX ++;
@@ -147,24 +233,28 @@ void update() {
     
     // Verificação de pontuação
     if (ballX <= 0) {
+        play_sound("/home/lucas/Documentos/homework/sounds/ponto.wav");
         // Ponto do jogador da direita
         ballX = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
         ballY = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
         ballVelocityX = BALL_SPEED;
         ballVelocityY = BALL_SPEED;
         rightScore++;
-        if(rightScore == 15){
+        if(rightScore == 2){
+          play_sound("/home/lucas/Documentos/homework/sounds/vitoria.wav");
           //Dispara som de vitoria do jogador 2
           exit(0);
         }
     } else if (ballX >= WINDOW_WIDTH - BALL_SIZE) {
+        play_sound("/home/lucas/Documentos/homework/sounds/ponto.wav");
         // Ponto do jogador da esquerda
         ballX = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
         ballY = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
         ballVelocityX = -BALL_SPEED;
         ballVelocityY = -BALL_SPEED;
         leftScore++;
-        if(leftScore == 15){
+        if(leftScore == 2){
+          play_sound("/home/lucas/Documentos/homework/sounds/vitoria.wav");
           //Dispara som de vitoria do jogador 2
           exit(0);
         }
