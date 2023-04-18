@@ -30,6 +30,8 @@ int ballVelocityY = BALL_SPEED; // velocidade y atual da bola
 int leftScore = 0; // pontuação do jogador da esquerda
 int rightScore = 0; // pontuação do jogador da direita
 
+bool isPaused = false;
+
 
 void drawBall() {
   glBegin(GL_TRIANGLE_FAN);
@@ -98,6 +100,10 @@ void display()
 }
 
 void update() {
+  if(isPaused){
+    return;
+  }
+
     // Movimentação da bola
     ballX += ballVelocityX;
     ballY += ballVelocityY;
@@ -184,6 +190,9 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 's':
             leftPaddleY -= PADDLE_SPEED;
+            break;
+        case ' ': 
+            isPaused = !isPaused;
             break;
         case 27: // tecla ESC
             exit(0);
