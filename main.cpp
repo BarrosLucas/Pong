@@ -9,68 +9,6 @@
 #include <AL/alut.h>
 #include <thread>
 
-bool isPlayingSound = false; // indica que o som está tocando
-
-void play_sound(const char* file_path) {
-
-    alutInit(NULL,NULL);
-    // Abrir o arquivo de som
-    ALuint buffer = alutCreateBufferFromFile(file_path);
-    if (!buffer) {
-        printf("Erro ao abrir o arquivo de som!\n");
-        return;
-    }
-
-    // Criar uma nova fonte de som
-    ALuint source;
-    alGenSources(1, &source);
-    if (alGetError() != AL_NO_ERROR) {
-        printf("Erro ao criar a fonte de som!\n");
-        alutExit();
-        return;
-    }
-
-    // Conectar a fonte de som com o buffer de som
-    alSourcei(source, AL_BUFFER, buffer);
-    if (alGetError() != AL_NO_ERROR) {
-        printf("Erro ao conectar a fonte de som com o buffer de som!\n");
-        alDeleteSources(1, &source);
-        alDeleteBuffers(1, &buffer);
-        alutExit();
-        return;
-    }
-
-    // Tocar o som
-    alSourcePlay(source);
-    if (alGetError() != AL_NO_ERROR) {
-        printf("Erro ao tocar o som!\n");
-        alDeleteSources(1, &source);
-        alDeleteBuffers(1, &buffer);
-        alutExit();
-        return;
-    }
-
-    // Aguardar o som terminar de tocar
-    ALint status;
-    do {
-        alGetSourcei(source, AL_SOURCE_STATE, &status);
-    } while (status == AL_PLAYING);
-
-    // Limpar os recursos
-    alDeleteSources(1, &source);
-    alDeleteBuffers(1, &buffer);
-    alutExit();
-
-    isPlayingSound = false;
-}
-
-void playSoundThread(const char* file_path) {
-    if (isPlayingSound) {
-        play_sound(file_path);
-    }
-}
-
-
 
 
 // Constantes do jogo
@@ -99,6 +37,7 @@ int leftScore = 0; // pontuação do jogador da esquerda
 int rightScore = 0; // pontuação do jogador da direita
 
 bool isPaused = false;
+bool isPlayingSound = false; // indica que o som está tocando
 
 // Variáveis para os sons
 ALCdevice *dev = NULL;
@@ -171,6 +110,65 @@ void display()
 
     // Atualiza o conteúdo da tela
     glutSwapBuffers();
+}
+
+void play_sound(const char* file_path) {
+
+    alutInit(NULL,NULL);
+    // Abrir o arquivo de som
+    ALuint buffer = alutCreateBufferFromFile(file_path);
+    if (!buffer) {
+        printf("Erro ao abrir o arquivo de som!\n");
+        return;
+    }
+
+    // Criar uma nova fonte de som
+    ALuint source;
+    alGenSources(1, &source);
+    if (alGetError() != AL_NO_ERROR) {
+        printf("Erro ao criar a fonte de som!\n");
+        alutExit();
+        return;
+    }
+
+    // Conectar a fonte de som com o buffer de som
+    alSourcei(source, AL_BUFFER, buffer);
+    if (alGetError() != AL_NO_ERROR) {
+        printf("Erro ao conectar a fonte de som com o buffer de som!\n");
+        alDeleteSources(1, &source);
+        alDeleteBuffers(1, &buffer);
+        alutExit();
+        return;
+    }
+
+    // Tocar o som
+    alSourcePlay(source);
+    if (alGetError() != AL_NO_ERROR) {
+        printf("Erro ao tocar o som!\n");
+        alDeleteSources(1, &source);
+        alDeleteBuffers(1, &buffer);
+        alutExit();
+        return;
+    }
+
+    // Aguardar o som terminar de tocar
+    ALint status;
+    do {
+        alGetSourcei(source, AL_SOURCE_STATE, &status);
+    } while (status == AL_PLAYING);
+
+    // Limpar os recursos
+    alDeleteSources(1, &source);
+    alDeleteBuffers(1, &buffer);
+    alutExit();
+
+    isPlayingSound = false;
+}
+
+void playSoundThread(const char* file_path) {
+    if (isPlayingSound) {
+        play_sound(file_path);
+    }
 }
 
 void update() {
