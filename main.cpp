@@ -63,15 +63,15 @@ void display()
 
     // Desenha o placar esquerdo
     glColor3f(1.0, 1.0, 1.0); // cor branca
-    glRasterPos2f(WINDOW_WIDTH/4, WINDOW_HEIGHT - 30); // posição do placar na tela
-    std::string leftScoreString = "Left score: " + std::to_string(leftScore);
+    glRasterPos2f(WINDOW_WIDTH/4 - 50, WINDOW_HEIGHT - 30);// posição do placar na tela
+    std::string leftScoreString = "Player 1: " + std::to_string(leftScore);
     for (char c : leftScoreString) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
     }
 
     // Desenha o placar direito
-    glRasterPos2f(3*WINDOW_WIDTH/4, WINDOW_HEIGHT - 30); // posição do placar na tela
-    std::string rightScoreString = "Right score: " + std::to_string(rightScore);
+    glRasterPos2f(3*WINDOW_WIDTH/4 - 50, WINDOW_HEIGHT - 30); // posição do placar na tela
+    std::string rightScoreString = "Player 2: " + std::to_string(rightScore);
     for (char c : rightScoreString) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
     }
@@ -109,9 +109,34 @@ void update() {
     
     // Colisão da bola com as raquetes
     if ((ballX <= LEFT_PADDLE_X + PADDLE_WIDTH) && (ballY + BALL_SIZE >= leftPaddleY && ballY <= leftPaddleY + PADDLE_HEIGHT)) {
-        ballVelocityX = BALL_SPEED;
+        if(ballVelocityX < 0){
+          ballVelocityX *= -1;
+          if(ballVelocityX > 0){
+            ballVelocityX ++;
+          }else{
+            ballVelocityX --;
+          }
+          
+          if(ballVelocityY > 0){
+            ballVelocityY ++;
+          }else{
+            ballVelocityY --;
+          }
+        }
     } else if ((ballX >= RIGHT_PADDLE_X - BALL_SIZE) && (ballY + BALL_SIZE >= rightPaddleY && ballY <= rightPaddleY + PADDLE_HEIGHT)) {
-        ballVelocityX = -BALL_SPEED;
+        if(ballVelocityX > 0){
+          ballVelocityX *= -1;
+          if(ballVelocityX > 0){
+            ballVelocityX ++;
+          }else{
+            ballVelocityX --;
+          }
+          if(ballVelocityY > 0){
+            ballVelocityY ++;
+          }else{
+            ballVelocityY --;
+          }
+        }
     }
     
     // Verificação de pontuação
@@ -122,6 +147,10 @@ void update() {
         ballVelocityX = BALL_SPEED;
         ballVelocityY = BALL_SPEED;
         rightScore++;
+        if(rightScore == 15){
+          //Dispara som de vitoria do jogador 2
+          exit(0);
+        }
     } else if (ballX >= WINDOW_WIDTH - BALL_SIZE) {
         // Ponto do jogador da esquerda
         ballX = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
@@ -129,8 +158,23 @@ void update() {
         ballVelocityX = -BALL_SPEED;
         ballVelocityY = -BALL_SPEED;
         leftScore++;
+        if(leftScore == 15){
+          //Dispara som de vitoria do jogador 2
+          exit(0);
+        }
     }
     display();
+}
+
+void specialKeys(int key, int x, int y) {
+    switch (key) {
+        case GLUT_KEY_UP:
+            rightPaddleY += PADDLE_SPEED;
+            break;
+        case GLUT_KEY_DOWN:
+            rightPaddleY -= PADDLE_SPEED;
+            break;
+    }
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -140,12 +184,6 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 's':
             leftPaddleY -= PADDLE_SPEED;
-            break;
-        case 'i':
-            rightPaddleY += PADDLE_SPEED;
-            break;
-        case 'k':
-            rightPaddleY -= PADDLE_SPEED;
             break;
         case 27: // tecla ESC
             exit(0);
@@ -177,6 +215,7 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display); // função que desenha o jogo
     glutIdleFunc(update); // função que atualiza o jogo
     glutKeyboardFunc(keyboard); // função que trata as teclas pressionadas
+    glutSpecialFunc(specialKeys);
     glutMainLoop(); // inicia o loop principal do jogo
     return 0;
 }
