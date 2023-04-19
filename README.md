@@ -23,8 +23,20 @@ This is a simple implementation of the classic game "Pong" using the OpenGL libr
 ### How to play
 
    - Use the "W" and "S" keys to move the left paddle up and down, respectively.
-   - Use the "I" and "K" keys to move the right paddle up and down, respectively.
+   - Use the "Up" and "Down" arrows keys to move the right paddle up and down, respectively.
    - The objective of the game is to score points by hitting the ball with your paddle and making it go past your opponent's paddle.
+   
+### Checklist
+
+   - [x] Use the "W", "S", "Up" arrow and "Down" arrow to move left and right paddle to up and to down.
+   - [x] Text players scores on top screen
+   - [ ] Colision with paddles and walls perfectly
+   - [x] Up speed when the ball colid with the paddle and when have a point the speed is restarted
+   - [ ] After a match the ball must be positioned with the player paddle that scored
+   - [x] Finish the game when one player to goal 15 points
+   - [x] Space key is used to pause and play the game
+   - [x] Play sounds when racket the ball, when some player score and when some player win
+   - [x] Use double buffering
 
 ### Credits
 
