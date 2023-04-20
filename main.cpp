@@ -10,7 +10,6 @@
 #include <thread>
 
 
-
 // Constantes do jogo
 const int WINDOW_WIDTH = 640; // largura da janela
 const int WINDOW_HEIGHT = 480; // altura da janela

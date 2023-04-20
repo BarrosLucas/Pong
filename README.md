@@ -11,7 +11,7 @@ This is a simple implementation of the classic game "Pong" using the OpenGL libr
 
    - On Linux:
         - Install the required libraries: sudo apt-get install freeglut3-dev
-        - Compile with the command: g++ pong.cpp -o pong -lglut -lGLU -lGL
+        - Compile with the command: g++ main.cpp -lglut -lGL -lGLEW -lGLU -lalut -lopenal -o main
 
    - On Windows:
         - Download freeglut library from https://www.transmissionzero.co.uk/software/freeglut-devel/
