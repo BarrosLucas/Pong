@@ -43,3 +43,4 @@ This is a simple implementation of the classic game "Pong" using the OpenGL libr
 This game was developed by:
 - Lucas Freitas de Barros
 - Matheus Fernandes de Sousa
+- José Gabriel de Sousa Silva
