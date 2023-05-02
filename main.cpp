@@ -38,6 +38,9 @@ int rightScore = 0; // pontuação do jogador da direita
 bool isPaused = false;
 bool isPlayingSound = false; // indica que o som está tocando
 
+bool pausedByRightPoint = false; // indica que o jogo foi pausado por um ponto do jogador da direita
+bool pausedByLeftPoint = false; // indica que o jogo foi pausado por um ponto do jogador da esquerda
+
 // Variáveis para os sons
 ALCdevice *dev = NULL;
 ALCcontext *ctx = NULL;
@@ -170,10 +173,29 @@ void playSoundThread(const char* file_path) {
     }
 }
 
-void update() {
-  if(isPaused){
-    return;
+//Posiciona a bola na barra do jogador que fez o ponto
+void updateBallPosicionByPoint(){
+
+  if(pausedByRightPoint){
+    ballX = RIGHT_PADDLE_X - (PADDLE_WIDTH + (BALL_SIZE/2));//Posicionando a bola na barra do jogador da direita
+    ballY = rightPaddleY + (BALL_SIZE * 2); //Posicionando a bola no meio da barra do jogador da direita
+    display();
   }
+  if(pausedByLeftPoint){
+    ballX = LEFT_PADDLE_X + (PADDLE_WIDTH + (BALL_SIZE/2));//Posicionando a bola na barra do jogador da esquerda
+    ballY = leftPaddleY + (BALL_SIZE * 2); //Posicionando a bola no meio da barra do jogador da esquerda
+    display();
+  }
+}
+
+void update() {
+    if(isPaused){
+      return;
+    }
+    if(pausedByLeftPoint || pausedByRightPoint){
+      return;
+    }
+
 
     // Movimentação da bola
     ballX += ballVelocityX;
@@ -190,7 +212,7 @@ void update() {
     (ballY + BALL_SIZE >= leftPaddleY && ballY <= leftPaddleY + PADDLE_HEIGHT)){
         if(ballVelocityX < 0){
           isPlayingSound = true;
-          const char* soundFile = "/home/lucas/Documentos/homework/sounds/paddle2.wav";
+          const char* soundFile = "sounds/paddle2.wav";
           std::thread soundThread([soundFile]() {
               playSoundThread(soundFile);
           });
@@ -213,7 +235,7 @@ void update() {
            (ballY + BALL_SIZE >= rightPaddleY && ballY <= rightPaddleY + PADDLE_HEIGHT)) {
         if(ballVelocityX > 0){
           isPlayingSound = true;
-          const char* soundFile = "/home/lucas/Documentos/homework/sounds/paddle2.wav";
+          const char* soundFile = "sounds/paddle2.wav";
           std::thread soundThread([soundFile]() {
               playSoundThread(soundFile);
           });
@@ -234,28 +256,30 @@ void update() {
     
     // Verificação de pontuação
     if (ballX <= 0) {
-        play_sound("/home/lucas/Documentos/homework/sounds/ponto.wav");
+        play_sound("sounds/ponto.wav");
         // Ponto do jogador da direita
-        ballX = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
-        ballY = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
+        pausedByRightPoint = true; 
+        updateBallPosicionByPoint();
+
         ballVelocityX = BALL_SPEED;
         ballVelocityY = BALL_SPEED;
         rightScore++;
-        if(rightScore == 2){
-          play_sound("/home/lucas/Documentos/homework/sounds/vitoria.wav");
+        if(rightScore == 15){
+          play_sound("sounds/vitoria.wav");
           //Dispara som de vitoria do jogador 2
           exit(0);
         }
     } else if (ballX >= WINDOW_WIDTH - BALL_SIZE) {
-        play_sound("/home/lucas/Documentos/homework/sounds/ponto.wav");
+        play_sound("sounds/ponto.wav");
         // Ponto do jogador da esquerda
-        ballX = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
-        ballY = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
+        pausedByLeftPoint = true;
+        updateBallPosicionByPoint();
+
         ballVelocityX = -BALL_SPEED;
         ballVelocityY = -BALL_SPEED;
         leftScore++;
-        if(leftScore == 2){
-          play_sound("/home/lucas/Documentos/homework/sounds/vitoria.wav");
+        if(leftScore == 15){
+          play_sound("sounds/vitoria.wav");
           //Dispara som de vitoria do jogador 2
           exit(0);
         }
@@ -264,31 +288,58 @@ void update() {
 }
 
 void specialKeys(int key, int x, int y) {
-    switch (key) {
-        case GLUT_KEY_UP:
+
+  switch (key) {
+      case GLUT_KEY_UP:
+          if(rightPaddleY < WINDOW_HEIGHT - PADDLE_HEIGHT){
             rightPaddleY += PADDLE_SPEED;
-            break;
-        case GLUT_KEY_DOWN:
+            updateBallPosicionByPoint();
+          }
+          break;
+      case GLUT_KEY_DOWN:
+          if(rightPaddleY > 0){
             rightPaddleY -= PADDLE_SPEED;
-            break;
-    }
+            updateBallPosicionByPoint();
+          }
+          break;
+      case GLUT_KEY_LEFT:
+          if(pausedByRightPoint){
+            pausedByRightPoint = !pausedByRightPoint;
+          }
+          break;
+  }
+
+  
 }
 
 void keyboard(unsigned char key, int x, int y) {
-    switch (key) {
-        case 'w':
+
+  switch (key) {
+      case 'w':
+          if(leftPaddleY < WINDOW_HEIGHT - PADDLE_HEIGHT){
             leftPaddleY += PADDLE_SPEED;
-            break;
-        case 's':
+            updateBallPosicionByPoint();
+          }
+          break;
+      case 's':
+          if(leftPaddleY > 0){
             leftPaddleY -= PADDLE_SPEED;
-            break;
-        case ' ': 
-            isPaused = !isPaused;
-            break;
-        case 27: // tecla ESC
-            exit(0);
-            break;
-    }
+            updateBallPosicionByPoint();
+          }
+          break;
+      case ' ': 
+          isPaused = !isPaused;
+          break;
+      case 'd':
+          if(pausedByLeftPoint){
+            pausedByLeftPoint = !pausedByLeftPoint;
+          }
+          break;
+      case 27: // tecla ESC
+          exit(0);
+          break;
+  }
+
 }
 
 void init() {
@@ -317,5 +368,6 @@ int main(int argc, char** argv) {
     glutKeyboardFunc(keyboard); // função que trata as teclas pressionadas
     glutSpecialFunc(specialKeys);
     glutMainLoop(); // inicia o loop principal do jogo
+
     return 0;
 }
