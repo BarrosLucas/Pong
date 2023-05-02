@@ -192,13 +192,14 @@ void updateBallPosicionByPoint(){
 }
 
 void update() {
-    if(isPaused){
-      return;
-    }
+
     if(pausedByLeftPoint || pausedByRightPoint){
       return;
     }
 
+    if(isPaused){
+      return;
+    }
 
     // Movimentação da bola
     ballX += ballVelocityX;
@@ -317,11 +318,6 @@ void specialKeys(int key, int x, int y) {
             updateBallPosicionByPoint();
           }
           break;
-      case GLUT_KEY_LEFT:
-          if(pausedByRightPoint){
-            pausedByRightPoint = !pausedByRightPoint;
-          }
-          break;
   }
 
   
@@ -345,9 +341,12 @@ void keyboard(unsigned char key, int x, int y) {
       case ' ': 
           isPaused = !isPaused;
           break;
-      case 'd':
+      case 13:
           if(pausedByLeftPoint){
             pausedByLeftPoint = !pausedByLeftPoint;
+          }
+          if(pausedByRightPoint){
+            pausedByRightPoint = !pausedByRightPoint;
           }
           break;
       case 27: // tecla ESC
