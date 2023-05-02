@@ -40,6 +40,7 @@ bool isPlayingSound = false; // indica que o som está tocando
 
 bool pausedByRightPoint = false; // indica que o jogo foi pausado por um ponto do jogador da direita
 bool pausedByLeftPoint = false; // indica que o jogo foi pausado por um ponto do jogador da esquerda
+bool returnAfterPoint = false;
 
 // Variáveis para os sons
 ALCdevice *dev = NULL;
@@ -179,11 +180,13 @@ void updateBallPosicionByPoint(){
   if(pausedByRightPoint){
     ballX = RIGHT_PADDLE_X - (PADDLE_WIDTH + (BALL_SIZE/2));//Posicionando a bola na barra do jogador da direita
     ballY = rightPaddleY + (BALL_SIZE * 2); //Posicionando a bola no meio da barra do jogador da direita
+    returnAfterPoint = true;
     display();
   }
   if(pausedByLeftPoint){
     ballX = LEFT_PADDLE_X + (PADDLE_WIDTH + (BALL_SIZE/2));//Posicionando a bola na barra do jogador da esquerda
     ballY = leftPaddleY + (BALL_SIZE * 2); //Posicionando a bola no meio da barra do jogador da esquerda
+    returnAfterPoint = true;
     display();
   }
 }
@@ -211,12 +214,18 @@ void update() {
     (ballX + BALL_SIZE >= LEFT_PADDLE_X) &&
     (ballY + BALL_SIZE >= leftPaddleY && ballY <= leftPaddleY + PADDLE_HEIGHT)){
         if(ballVelocityX < 0){
-          isPlayingSound = true;
-          const char* soundFile = "sounds/paddle2.wav";
-          std::thread soundThread([soundFile]() {
-              playSoundThread(soundFile);
-          });
-          soundThread.detach();
+
+          if(!returnAfterPoint){
+            isPlayingSound = true;
+            const char* soundFile = "sounds/paddle2.wav";
+            std::thread soundThread([soundFile]() {
+                playSoundThread(soundFile);
+            });
+            soundThread.detach();
+          }else{
+            returnAfterPoint = false;
+          }
+
           ballVelocityX *= -1;
           if(ballVelocityX > 0){
             ballVelocityX ++;
@@ -233,13 +242,19 @@ void update() {
     } else if ((ballX + BALL_SIZE >= RIGHT_PADDLE_X) && 
            (ballX <= RIGHT_PADDLE_X + PADDLE_WIDTH) &&
            (ballY + BALL_SIZE >= rightPaddleY && ballY <= rightPaddleY + PADDLE_HEIGHT)) {
-        if(ballVelocityX > 0){
-          isPlayingSound = true;
-          const char* soundFile = "sounds/paddle2.wav";
-          std::thread soundThread([soundFile]() {
-              playSoundThread(soundFile);
-          });
-          soundThread.detach();
+        if(ballVelocityX > 0 ){
+
+          if(!returnAfterPoint){
+            isPlayingSound = true;
+            const char* soundFile = "sounds/paddle2.wav";
+            std::thread soundThread([soundFile]() {
+                playSoundThread(soundFile);
+            });
+            soundThread.detach();
+          }else{
+            returnAfterPoint = false;
+          }
+
           ballVelocityX *= -1;
           if(ballVelocityX > 0){
             ballVelocityX ++;
