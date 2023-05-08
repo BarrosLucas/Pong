@@ -8,6 +8,7 @@
 #include <AL/alc.h>
 #include <AL/alut.h>
 #include <thread>
+#include <unistd.h>
 
 
 // Constantes do jogo
@@ -155,10 +156,7 @@ void play_sound(const char* file_path) {
     }
 
     // Aguardar o som terminar de tocar
-    ALint status;
-    do {
-        alGetSourcei(source, AL_SOURCE_STATE, &status);
-    } while (status == AL_PLAYING);
+    sleep(2);
 
     // Limpar os recursos
     alDeleteSources(1, &source);
